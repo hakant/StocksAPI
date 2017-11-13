@@ -22,30 +22,56 @@ namespace StocksCoreApi.Controllers
 
         // POST api/start
         [HttpPost]
-        public void Post([FromBody]string numberOfStocks)
+        public void Post([FromBody]StockSizeRequest request)
         {
             _context.Stocks.RemoveRange(_context.Stocks);
-
-            _context.Stocks.Add(new StockInfo {
-                Name = "MSFT",
-                LastClosingPrice = 250,
-                LastPrice = 252.3M,
-                Change = 2.3M,
-                PercentageChange = 0.08M
-            });
-            _context.Stocks.Add(new StockInfo {
-                Name = "APPL",
-                LastClosingPrice = 310,
-                LastPrice = 309.3M,
-                Change = -0.7M,
-                PercentageChange = -0.03M
-            });
-
             _context.Stats.RemoveRange(_context.Stats);
-            _context.Stats.Add(new BankerStats {
+            _context.SaveChanges();
+
+            var random = new Random();
+            List<string> stockNames = new List<string> {
+                "GOOGL",
+                "AMZN",
+                "MSFT",
+                "AAPL",
+                "ADSK",
+                "CSCO",
+                "FB",
+                "NFLX",
+                "NI",
+                "NVDA",
+                "PYPL",
+                "QCOM",
+                "CRM",
+                "TXN",
+                "TRIP",
+                "VRSN",
+                "WDC",
+                "DIS",
+                "SBUX",
+                "CTXS"
+            };
+
+            for (int i = 0; i < request.NumberOfStocks; i++)
+            {
+                var name = stockNames[i];
+                var lastClosingPrice = Convert.ToDecimal(random.NextDouble(2, 200));
+
+                _context.Stocks.Add(new StockInfo
+                {
+                    Name = name,
+                    LastClosingPrice = lastClosingPrice,
+                    LastPrice = lastClosingPrice,
+                    Change = 0,
+                    PercentageChange = 0
+                });
+            }
+
+            _context.Stats.Add(new BankerStats
+            {
                 Id = 1,
                 NetLiquidationValue = 12300,
-                Cash = 3400 
+                Cash = 3400
             });
 
             _context.SaveChanges();

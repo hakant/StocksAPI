@@ -22,10 +22,10 @@ namespace StocksCoreApi.Controllers
 
         // GET api/stocks
         [HttpGet]
-        public StocksDashboardModel Get()
+        public StockDashboardResponse Get()
         {
             Random rnd = new Random();
-            var model = new StocksDashboardModel();
+            var model = new StockDashboardResponse();
             var stats = _context.Stats.First();
 
             model.Cash = stats.Cash;

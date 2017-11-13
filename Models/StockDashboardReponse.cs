@@ -3,9 +3,9 @@ using System.Dynamic;
 
 namespace StocksCoreApi.Models
 {
-    public class StocksDashboardModel
+    public class StockDashboardResponse
     {
-        public StocksDashboardModel()
+        public StockDashboardResponse()
         {
             Stocks = new ExpandoObject();
         }
