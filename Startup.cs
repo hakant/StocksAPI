@@ -39,7 +39,9 @@ namespace Stocks_Core_API
             }
 
             app.UseCors(builder =>
-                builder.WithOrigins("http://localhost:4200")
+                builder.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod()
                 );
 
             app.UseMvc();
