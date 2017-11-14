@@ -26,7 +26,7 @@ namespace StocksCoreApi.Controllers
         {
             Random rnd = new Random();
             var model = new StockDashboardResponse();
-            var stats = _context.Stats.First();
+            var stats = _context.Stats.OrderByDescending(s => s.Id).First();
 
             model.Cash = stats.Cash;
             model.NetLiquidationValue = stats.NetLiquidationValue;
@@ -70,7 +70,7 @@ namespace StocksCoreApi.Controllers
             var stock = _context.Stocks.FirstOrDefault(s => s.Name == purchaseRequest.StockName);
             if (stock != null && purchaseRequest.Units > 0)
             {
-                var stats = _context.Stats.First();
+                var stats = _context.Stats.OrderByDescending(s => s.Id).First();
                 var requestedValue = stock.LastPrice * purchaseRequest.Units;
                 if (requestedValue <= stats.Cash)
                 {
