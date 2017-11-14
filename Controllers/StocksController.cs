@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using StocksCoreApi.Data;
+using StocksCoreApi.Domain.GetStocks;
 using StocksCoreApi.Models;
 
 namespace StocksCoreApi.Controllers
@@ -13,52 +15,27 @@ namespace StocksCoreApi.Controllers
     [Route("api/[controller]")]
     public class StocksController : Controller
     {
+        private readonly IMediator _application;
         private readonly StocksContext _context;
 
-        public StocksController(StocksContext context)
+        public StocksController(IMediator application, StocksContext context)
         {
+            _application = application;
             _context = context;
         }
 
         // GET api/stocks
         [HttpGet]
-        public StockDashboardResponse Get()
+        public async Task<StockDashboardResponse> Get()
         {
-            Random rnd = new Random();
-            var model = new StockDashboardResponse();
-            var stats = _context.Stats.OrderByDescending(s => s.Id).First();
-
-            // Cash
-            model.Cash = stats.Cash;
-            model.NetLiquidationValue = stats.Cash;
-
-            // Stocks
-            var x = new ExpandoObject() as IDictionary<string, Object>;
-
-            foreach (var stock in _context.Stocks)
-            {
-                decimal change = Convert.ToDecimal(rnd.NextDouble(-0.1, 0.1));
-                decimal lastPrice = stock.LastPrice;
-                stock.LastPrice = stock.LastPrice + (stock.LastPrice * change);
-                stock.Change = stock.LastPrice - lastPrice;
-                stock.PercentageChange = change;
-                
-                x.Add(stock.Name, new {
-                    LastPrice = stock.LastPrice,
-                    Change = stock.Change,
-                    PercentageChange = stock.PercentageChange,
-                    Position = stock.Position
-                });
-
-                if (stock.Position > 0){
-                    model.NetLiquidationValue += stock.LastPrice * stock.Position;
-                }
-            }
-            model.Stocks = (ExpandoObject)x;
-
-            _context.SaveChanges();
-
-            return model;
+            var request = new GetStocksRequest();
+            var response = await _application.Send(request);
+            
+            return new StockDashboardResponse {
+                Cash = response.Cash,
+                NetLiquidationValue = response.NetLiquidationValue,
+                Stocks = response.Stocks
+            };
         }
 
         // POST api/stocks
