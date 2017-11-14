@@ -83,7 +83,7 @@ namespace StocksCoreApi.Controllers
                 else 
                 {
                     requestedValue = stats.Cash;
-                    var units = stock.LastPrice / requestedValue;
+                    var units = requestedValue / stock.LastPrice;
                     stats.Cash = stats.Cash - requestedValue;
                     stock.Position = stock.Position + units;
                     _context.Transactions.Add(new TransactionInfo {
