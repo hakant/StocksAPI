@@ -12,5 +12,7 @@ namespace StocksCoreApi.Data
         public DbSet<StockInfo> Stocks { get; set; }
 
         public DbSet<BankerStats> Stats { get; set; }
+
+        public DbSet<TransactionInfo> Transactions { get; set; }
     }
 }

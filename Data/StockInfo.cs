@@ -10,5 +10,6 @@ namespace StocksCoreApi.Data
         public decimal LastPrice { get; set; }
         public decimal Change { get; set; }
         public decimal PercentageChange { get; set; }
+        public decimal Position { get; set; }
     }
 }

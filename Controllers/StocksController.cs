@@ -44,7 +44,8 @@ namespace StocksCoreApi.Controllers
                 x.Add(stock.Name, new {
                     LastPrice = stock.LastPrice,
                     Change = stock.Change,
-                    PercentageChange = stock.PercentageChange
+                    PercentageChange = stock.PercentageChange,
+                    Position = stock.Position
                 });
             }
 
@@ -64,8 +65,41 @@ namespace StocksCoreApi.Controllers
 
         // POST api/stocks
         [HttpPost]
-        public void Post([FromBody]string numberOfStocks)
+        public void Post([FromBody] StockPurchaseRequest purchaseRequest)
         {
+            var stock = _context.Stocks.FirstOrDefault(s => s.Name == purchaseRequest.StockName);
+            if (stock != null && purchaseRequest.Units > 0)
+            {
+                var stats = _context.Stats.First();
+                var requestedValue = stock.LastPrice * purchaseRequest.Units;
+                if (requestedValue <= stats.Cash)
+                {
+                    stats.Cash = stats.Cash - requestedValue;
+                    stock.Position = stock.Position + purchaseRequest.Units;
+                    _context.Transactions.Add(new TransactionInfo {
+                        TransactionDate = DateTime.UtcNow,
+                        UnitsPurchased = purchaseRequest.Units,
+                        PurchasePrice = stock.LastPrice
+                    });
+                }
+                else 
+                {
+                    requestedValue = stats.Cash;
+                    var units = stock.LastPrice / requestedValue;
+                    stats.Cash = stats.Cash - requestedValue;
+                    stock.Position = stock.Position + units;
+                    _context.Transactions.Add(new TransactionInfo {
+                        TransactionDate = DateTime.UtcNow,
+                        UnitsPurchased = units,
+                        PurchasePrice = stock.LastPrice
+                    });
+                }
+
+                _context.SaveChanges();
+                return;
+            }
+
+            throw new Exception("Something is not right.");
         }
 
         // PUT api/stocks/5
