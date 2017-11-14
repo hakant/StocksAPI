@@ -70,8 +70,8 @@ namespace StocksCoreApi.Controllers
             _context.Stats.Add(new BankerStats
             {
                 Id = 1,
-                NetLiquidationValue = 12300,
-                Cash = 3400
+                NetLiquidationValue = 10000,
+                Cash = 10000
             });
 
             _context.SaveChanges();

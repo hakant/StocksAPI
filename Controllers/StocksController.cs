@@ -28,9 +28,11 @@ namespace StocksCoreApi.Controllers
             var model = new StockDashboardResponse();
             var stats = _context.Stats.OrderByDescending(s => s.Id).First();
 
+            // Cash
             model.Cash = stats.Cash;
-            model.NetLiquidationValue = stats.NetLiquidationValue;
+            model.NetLiquidationValue = stats.Cash;
 
+            // Stocks
             var x = new ExpandoObject() as IDictionary<string, Object>;
 
             foreach (var stock in _context.Stocks)
@@ -47,20 +49,16 @@ namespace StocksCoreApi.Controllers
                     PercentageChange = stock.PercentageChange,
                     Position = stock.Position
                 });
-            }
 
+                if (stock.Position > 0){
+                    model.NetLiquidationValue += stock.LastPrice * stock.Position;
+                }
+            }
             model.Stocks = (ExpandoObject)x;
 
             _context.SaveChanges();
 
             return model;
-        }
-
-        // GET api/stocks/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
         }
 
         // POST api/stocks
@@ -100,18 +98,6 @@ namespace StocksCoreApi.Controllers
             }
 
             throw new Exception("Something is not right.");
-        }
-
-        // PUT api/stocks/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-
-        // DELETE api/stocks/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }
