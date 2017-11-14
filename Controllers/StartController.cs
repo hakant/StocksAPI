@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using StocksCoreApi.Data;
+using StocksCoreApi.Domain.LoadSession;
 using StocksCoreApi.Models;
 
 namespace StocksCoreApi.Controllers
@@ -13,68 +15,22 @@ namespace StocksCoreApi.Controllers
     [Route("api/[controller]")]
     public class StartController : Controller
     {
-        private readonly StocksContext _context;
+        private readonly IMediator _application;
 
-        public StartController(StocksContext context)
+        public StartController(IMediator application)
         {
-            _context = context;
+            _application = application;
         }
 
         // POST api/start
         [HttpPost]
         public void Post([FromBody]StockSizeRequest request)
         {
-            _context.Stocks.RemoveRange(_context.Stocks);
-            _context.Stats.RemoveRange(_context.Stats);
-            _context.SaveChanges();
-
-            var random = new Random();
-            List<string> stockNames = new List<string> {
-                "GOOGL",
-                "AMZN",
-                "MSFT",
-                "AAPL",
-                "ADSK",
-                "CSCO",
-                "FB",
-                "NFLX",
-                "NI",
-                "NVDA",
-                "PYPL",
-                "QCOM",
-                "CRM",
-                "TXN",
-                "TRIP",
-                "VRSN",
-                "WDC",
-                "DIS",
-                "SBUX",
-                "CTXS"
+            var loadSessionRequest = new LoadSessionRequest{
+                NumberOfStocks = request.NumberOfStocks
             };
 
-            for (int i = 0; i < request.NumberOfStocks; i++)
-            {
-                var name = stockNames[i];
-                var lastClosingPrice = Convert.ToDecimal(random.NextDouble(2, 200));
-
-                _context.Stocks.Add(new StockInfo
-                {
-                    Name = name,
-                    LastClosingPrice = lastClosingPrice,
-                    LastPrice = lastClosingPrice,
-                    Change = 0,
-                    PercentageChange = 0
-                });
-            }
-
-            _context.Stats.Add(new BankerStats
-            {
-                Id = 1,
-                NetLiquidationValue = 10000,
-                Cash = 10000
-            });
-
-            _context.SaveChanges();
+            _application.Send(loadSessionRequest);
         }
     }
 }

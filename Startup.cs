@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using StocksCoreApi.Data;
+using MediatR;
 
 namespace Stocks_Core_API
 {
@@ -28,6 +29,7 @@ namespace Stocks_Core_API
             services.AddDbContext<StocksContext>(opt => opt.UseInMemoryDatabase("Stocks"));
             services.AddMvc();
             services.AddCors();
+            services.AddMediatR(typeof(Startup).Assembly);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
