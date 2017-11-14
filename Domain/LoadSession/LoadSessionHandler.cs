@@ -11,19 +11,7 @@ namespace StocksCoreApi.Domain.LoadSession
     }
     public class LoadSessionHandler : IRequestHandler<LoadSessionRequest>
     {
-        private readonly StocksContext _context;
-        public LoadSessionHandler(StocksContext context)
-        {
-            _context = context;
-        }
-        public void Handle(LoadSessionRequest request)
-        {
-            _context.Stocks.RemoveRange(_context.Stocks);
-            _context.Stats.RemoveRange(_context.Stats);
-            _context.SaveChanges();
-
-            var random = new Random();
-            List<string> stockNames = new List<string> {
+        private List<string> stockNames = new List<string> {
                 "GOOGL",
                 "AMZN",
                 "MSFT",
@@ -45,8 +33,32 @@ namespace StocksCoreApi.Domain.LoadSession
                 "SBUX",
                 "CTXS"
             };
+        private readonly StocksContext _context;
+        public LoadSessionHandler(StocksContext context)
+        {
+            _context = context;
+        }
+        public void Handle(LoadSessionRequest request)
+        {
+            ClearDatabase();
+            GenerateStocks(request.NumberOfStocks);
+            CreateInitialBankerStats();
 
-            for (int i = 0; i < request.NumberOfStocks; i++)
+            _context.SaveChanges();
+        }
+
+        private void ClearDatabase()
+        {
+            _context.Stocks.RemoveRange(_context.Stocks);
+            _context.Stats.RemoveRange(_context.Stats);
+            _context.SaveChanges();
+        }
+
+        private void GenerateStocks(int numberOfStocks)
+        {
+            var random = new Random();
+
+            for (int i = 0; i < numberOfStocks; i++)
             {
                 var name = stockNames[i];
                 var lastClosingPrice = Convert.ToDecimal(random.NextDouble(2, 200));
@@ -60,15 +72,16 @@ namespace StocksCoreApi.Domain.LoadSession
                     PercentageChange = 0
                 });
             }
-
+        }
+        
+        private void CreateInitialBankerStats()
+        {
             _context.Stats.Add(new BankerStats
             {
                 Id = 1,
                 NetLiquidationValue = 10000,
                 Cash = 10000
             });
-
-            _context.SaveChanges();
-        }
+        }   
     }
 }
